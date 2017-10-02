@@ -13,6 +13,8 @@
 #undef PJ_HAS_FLOATING_POINT
 #define PJ_HAS_FLOATING_POINT		0
 
+#define PJ_HAS_IFADDRS_H            0
+
 /*
  * PJMEDIA settings
  */
