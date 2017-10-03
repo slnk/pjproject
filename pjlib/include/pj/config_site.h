@@ -28,9 +28,11 @@
 /* Disable some codecs */
 #define PJMEDIA_HAS_L16_CODEC		0
 //#define PJMEDIA_HAS_G722_CODEC		0
+#	define PJMEDIA_HAS_SPEEX_AEC		0
+#	define PJMEDIA_HAS_SPEEX_CODEC		0
 
 /* Fine tune Speex's default settings for best performance/quality */
-#define PJMEDIA_CODEC_SPEEX_DEFAULT_QUALITY	5
+//#define PJMEDIA_CODEC_SPEEX_DEFAULT_QUALITY	5
 
 /*
  * PJSIP settings.
