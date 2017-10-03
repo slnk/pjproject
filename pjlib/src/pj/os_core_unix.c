@@ -1927,7 +1927,7 @@ PJ_DEF(pj_status_t) pj_term_set_color(pj_color_t color)
 	break;
     }
 
-    fputs(ansi_color, stdout);
+    //fputs(ansi_color, stdout);
 
     return PJ_SUCCESS;
 }
