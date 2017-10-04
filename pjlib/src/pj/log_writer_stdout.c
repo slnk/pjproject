@@ -1,4 +1,4 @@
-/* $Id$ */
+/* $Id: log_writer_stdout.c 3553 2011-05-05 06:14:19Z nanang $ */
 /* 
  * Copyright (C) 2008-2011 Teluu Inc. (http://www.teluu.com)
  * Copyright (C) 2003-2008 Benny Prijono <benny@prijono.org>
@@ -21,6 +21,9 @@
 #include <pj/os.h>
 #include <pj/compat/stdfileio.h>
 
+/* SPECTRALINK PATCH */
+#include <jni.h>
+#include <android/log.h>
 
 static void term_set_color(int level)
 {
@@ -40,18 +43,64 @@ static void term_restore_color(void)
 }
 
 
+/* SPECTRALINK PATCH BELOW */
+
+/////
+// Android logging outputs a max of 1023 characters.  So break the message into smaller chunks to
+// send to logcat.
+//
+// Android logging using a null terminated string so code below temporarily adds a null terminator.
+/////
+PJ_DEF(void) pj_split_and_write_log(char * start, int len)
+{
+    static const int BLOCK_SIZE = 1023;
+
+    while (len > BLOCK_SIZE)
+    {
+        char * end = start + BLOCK_SIZE;
+        char temp;
+        while ((*end != '\n') && (*end != '\r'))
+        {
+            end--;
+            if (end <= start)
+            {
+                // No CRLF in message for a clean split so just split at BLOCK_SIZE
+                end = start + BLOCK_SIZE;
+                break;
+            }
+        }
+        temp = *end;
+        *end = '\0';
+        __android_log_print(ANDROID_LOG_VERBOSE, "SlnkSip", "%s", start);
+        *end = temp;
+        end++;
+        len -= end - start;
+        start = end;
+    }
+    if (len > 0)
+    {
+        __android_log_print(ANDROID_LOG_VERBOSE, "SlnkSip", "%s", start);
+    }
+}
+
+/* end SPECTRALINK PATCH */
+
+
+
 PJ_DEF(void) pj_log_write(int level, const char *buffer, int len)
 {
     PJ_CHECK_STACK();
-    PJ_UNUSED_ARG(len);
+
+    /* SPECTRALINK PATCHES BELOW -- write to android logcat */
 
     /* Copy to terminal/file. */
     if (pj_log_get_decor() & PJ_LOG_HAS_COLOR) {
 	term_set_color(level);
 	printf("%s", buffer);
-	term_restore_color();
+        pj_split_and_write_log(buffer, len);	term_restore_color();
     } else {
 	printf("%s", buffer);
+        pj_split_and_write_log(buffer, len);
     }
 }
 
